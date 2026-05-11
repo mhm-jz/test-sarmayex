@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:sarmayex/core/errors/sse_exception.dart';
@@ -70,6 +71,10 @@ class HttpSseConnection implements SseConnection {
     controller = StreamController<String>(
       onListen: () async {
         try {
+          _sseLog(
+            'api call uri=$uri '
+            'connectionTimeout=$connectionTimeout idleTimeout=$idleTimeout',
+          );
           request = await _httpClient.getUrl(uri).timeout(connectionTimeout);
 
           request!.headers.set(HttpHeaders.acceptHeader, 'text/event-stream');
@@ -132,4 +137,8 @@ class HttpSseConnection implements SseConnection {
   void dispose() {
     _httpClient.close(force: true);
   }
+}
+
+void _sseLog(String message) {
+  developer.log(message, name: 'SSE_CONNECTION');
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:sarmayex/core/network/sse/sse_event.dart';
 
@@ -39,6 +40,7 @@ class SseClientImpl implements SseClient {
 
     Future<void> reconnectDelay() async {
       final delay = _retryPolicy.delayForAttempt(retryAttempt);
+      _sseLog('retry uri=$uri attempt=$retryAttempt delay=$delay');
 
       retryAttempt++;
       await Future.delayed(delay);
@@ -165,6 +167,9 @@ class SseClientImpl implements SseClient {
           if (cancelled || currentGeneration != generation) {
             return;
           }
+
+          _sseLog('error uri=$uri attempt=$retryAttempt error=$error');
+
           if (!reconnect ||
               !_retryPolicy.shouldRetryError(error, retryAttempt)) {
             if (!controller.isClosed) {
@@ -198,4 +203,8 @@ class SseClientImpl implements SseClient {
 
     return controller.stream;
   }
+}
+
+void _sseLog(String message) {
+  developer.log(message, name: 'SSE_CLIENT');
 }
